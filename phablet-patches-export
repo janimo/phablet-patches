@@ -1,0 +1,25 @@
+#!/bin/sh
+if [ $# -lt 3 ];then
+    echo "Usage: $0 rev1 rev1 outdir [project] (ex: cm-10.1 phablet-saucy patches)"
+    exit
+fi
+
+REV1=$1
+REV2=$2
+OUT=$(pwd)/$3
+PROJECT=$4
+
+mkdir -p $OUT
+
+#For projects that have both REV1 and REV2 revisions (tags, branches, etc.)
+#create a summary of the commit delta and dump the git formatted patches if there are any
+
+repo forall $PROJECT -c \
+    "(git tag && git branch -a )|grep $REV1 >/dev/null && \
+    (git tag && git branch -a )|grep $REV2 >/dev/null && \
+    git log --oneline $REV1..$REV2 >$OUT/tmpfile;\
+    if [ -s $OUT/tmpfile ];then
+        mkdir -p $OUT/\$REPO_PATH;
+        mv $OUT/tmpfile $OUT/\$REPO_PATH/commits;
+        git format-patch $REV1..$REV2 -o $OUT/\$REPO_PATH;
+    fi"

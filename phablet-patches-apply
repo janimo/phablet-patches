@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ $# -lt 1 ];then
+    echo "Usage $0 patchdir [project]"
+    exit
+fi
+
+PD=`readlink -f $1`
+PROJECT=$2
+NEWBRANCH=` repo info -o|grep merge|cut -f 2 -d:|tr -d ' '|sed 's/android/phablet/'`
+
+echo Creating branch $NEWBRANCH and applying patches on it
+apply_to_project() {
+    echo $PROJECT
+    repo start $NEWBRANCH $PROJECT
+    repo forall $PROJECT -c "
+    for p in $PD/$PROJECT/*.patch;do
+        git am --keep-cr \$p || (git am --abort && echo FAILED TO APPLY \$p)
+    done"
+}
+
+if [ -n "$PROJECT" ];then
+    apply_to_project
+    exit
+fi
+
+#Patches in Ubuntu Touch we do not necessarily need to port to AOSP/CodeAurora as they are CM or target specific and not much use for the OEM
+DROPPED="android|vendor|goldfish"
+
+find $PD -name commits |xargs -n 1 dirname `sed "s;$PD/;;"` | grep -v -E "$DROPPED" | while read PROJECT
+do
+    apply_to_project
+done
