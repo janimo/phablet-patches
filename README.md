@@ -8,9 +8,11 @@ Inside an Ubuntu for Phones Android tree specify where to save the commit logs a
 describing the changes between two branches.
 
 This exports all patches made in the saucy branches agains the original CyanogenMod branches.
+
 `/path/to/phablet-patches-export phablet/cm-10.1 phablet/phablet-saucy patches_dir`
 
-This exports all patches, this time against stock AOSP's android-4.2.2_r1 tag, so they can be applied to an AOSP based tree
+This exports all patches, this time against stock AOSP's android-4.2.2_r1 tag.
+
 `/path/to/phablet-patches-export android-4.2.2_r1 phablet/phablet-4.2.2_r1 patches_dir`
 
 ## Applying patches in an output dir to an Android tree
@@ -29,5 +31,7 @@ An optional second argument applies the patches only to a given project, if you 
 When git am fails on a patch you can try git apply --reject and fix it up manually.
 
 You can always verify which projects were changed and what commits got applied to each
+
 `repo info -o`
 
+At this point if you have all patches applied, the tree is still not complete. You need to manually copy over uptodate copies ubuntu/ and external/gpg from the phablet branches.
