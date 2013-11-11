@@ -15,7 +15,7 @@ apply_to_project() {
     repo start $NEWBRANCH $PROJECT
     repo forall $PROJECT -c "
     for p in $PD/$PROJECT/*.patch;do
-        git am --keep-cr \$p || (git am --abort && echo FAILED TO APPLY \$p)
+        git am --keep-cr \$p >/dev/null 2>&1 || (git am --abort && echo FAILED TO APPLY \$p)
     done"
 }
 
