@@ -6,6 +6,12 @@ if [ $# -lt 1 ];then
 fi
 
 PD=`readlink -f $1`
+
+if [ ! -d $PD ];then
+    echo "Patch directory $PD does not exist"
+    exit
+fi
+
 PROJECT=$2
 NEWBRANCH=` repo info -o|grep merge|cut -f 2 -d:|tr -d ' '|sed 's/android/phablet/'`
 
