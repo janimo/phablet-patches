@@ -9,6 +9,12 @@ PD=`readlink -f $1`
 PROJECT=$2
 NEWBRANCH=` repo info -o|grep merge|cut -f 2 -d:|tr -d ' '|sed 's/android/phablet/'`
 
+if [ ! -d $PD ] ; then
+    echo "patchdir ${PD} is not exist."
+    echo "Usage $0 patchdir [project]"
+    exit -1
+fi
+
 echo Creating branch $NEWBRANCH and applying patches on it
 apply_to_project() {
     echo $PROJECT
