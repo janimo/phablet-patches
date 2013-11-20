@@ -6,7 +6,7 @@ fi
 
 REV1=$1
 REV2=$2
-OUT=$(pwd)/$3
+OUT=`readlink -f $3`
 PROJECT=$4
 
 mkdir -p $OUT
