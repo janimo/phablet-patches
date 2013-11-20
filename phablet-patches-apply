@@ -27,7 +27,7 @@ fi
 #Patches in Ubuntu Touch we do not necessarily need to port to AOSP/CodeAurora as they are CM or target specific and not much use for the OEM
 DROPPED="android|vendor|goldfish"
 
-find $PD -name commits |xargs -n 1 dirname "`sed "s;$PD/;;"`" | grep -v -E "$DROPPED" | while read PROJECT
+find $PD -name commits |xargs -n 1 dirname `sed "s;$PD/;;"` | grep -v -E "$DROPPED" | while read PROJECT
 do
     apply_to_project
 done
