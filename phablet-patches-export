@@ -6,10 +6,11 @@ fi
 
 REV1=$1
 REV2=$2
-OUT=`readlink -f $3`
+OUT=$3
 PROJECT=$4
 
 mkdir -p $OUT
+OUT=`readlink -f $3`
 
 #For projects that have both REV1 and REV2 revisions (tags, branches, etc.)
 #create a summary of the commit delta and dump the git formatted patches if there are any
