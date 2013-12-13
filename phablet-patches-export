@@ -23,4 +23,6 @@ repo forall $PROJECT -c \
         mkdir -p $OUT/\$REPO_PATH;
         mv $OUT/tmpfile $OUT/\$REPO_PATH/commits;
         git format-patch $REV1..$REV2 -o $OUT/\$REPO_PATH;
-    fi"
+    fi; \
+    rm -f $OUT/tmpfile \
+    "
