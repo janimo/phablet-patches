@@ -12,29 +12,38 @@ if [ ! -d $PD ];then
     exit
 fi
 
-PROJECT=$2
-NEWBRANCH=` repo info -o|grep merge|cut -f 2 -d:|tr -d ' '|sed 's/android/phablet/'`
+
+RD=$PD
+while [ ! -d $RD/bionic ];do
+	RD=`dirname $RD`
+done
+
+NEWBRANCH=` repo info -o|grep merge|cut -f 2 -d:|tr -d ' '|sed 's,^.*/,phablet-,'`
 
 echo Creating branch $NEWBRANCH and applying patches on it
+
 apply_to_project() {
     echo $PROJECT
     repo start $NEWBRANCH $PROJECT
     repo forall $PROJECT -c "
-    for p in $PD/$PROJECT/*.patch;do
-        echo Applying \$p
-        git am --keep-cr \$p >/dev/null 2>&1 || (git am --abort && echo FAILED TO APPLY \$p)
-    done"
+    for p in $RD/$PROJECT/*.patch;do
+	    pn=\$(basename \$p)
+	    grep \$pn ,applied >/dev/null 2>&1 && echo Skipping already applied patch \$pn && continue
+	    echo Applying \$p
+	    if git am --keep-cr \$p >/dev/null 2>&1;then
+		    echo \$pn >>,applied
+	    else
+		    git am --abort && echo FAILED TO APPLY \$p
+		    break
+	    fi
+    done
+    "
 }
 
-if [ -n "$PROJECT" ];then
-    apply_to_project
-    exit
-fi
-
 #Patches in Ubuntu Touch we do not necessarily need to port to AOSP/CodeAurora as they are CM or target specific and not much use for the OEM
-DROPPED="android|vendor"
+DROPPED="android|vendor|qemu"
 
-find $PD -name commits |xargs -n 1 dirname  | sed "s;$PD/;;" | grep -v -E "$DROPPED" | while read PROJECT
+find $PD -name commits |xargs -n 1 dirname  | sed "s;$RD/;;" | grep -v -E "$DROPPED" | while read PROJECT
 do
     apply_to_project
 done
