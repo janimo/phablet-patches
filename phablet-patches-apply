@@ -18,21 +18,28 @@ while [ ! -d $RD/bionic ];do
 	RD=`dirname $RD`
 done
 
-NEWBRANCH=` repo info -o|grep merge|cut -f 2 -d:|tr -d ' '|sed 's,^.*/,phablet-,'`
+NEWBRANCH=`repo info -o|grep merge|cut -f 2 -d:|tr -d ' '|sed 's,^.*/,,;s,^,phablet-,'`
 
-echo Creating branch $NEWBRANCH and applying patches on it
+# This will start applying patches to a project using git am and stop at the first one that fails
+# Patches tried so far are written to ,applied under the project directory so a
+# subsequent invocation starts from where it last failed.
+# You can fix a failed patch by git apply --reject and manual editing,  then remove
+# the FAILED prefix from ,applied to mark a failed patch fixed.
 
 apply_to_project() {
-    echo $PROJECT
+    echo Creating branch $NEWBRANCH and applying patches on it for project $PROJECT
+
     repo start $NEWBRANCH $PROJECT
+
     repo forall $PROJECT -c "
     for p in $RD/$PROJECT/*.patch;do
 	    pn=\$(basename \$p)
-	    grep \$pn ,applied >/dev/null 2>&1 && echo Skipping already applied patch \$pn && continue
+	    grep -w \$pn ,applied >/dev/null 2>&1 && echo Skipping already applied patch \$pn && continue
 	    echo Applying \$p
-	    if git am --keep-cr \$p >/dev/null 2>&1;then
+	    if git am -p1 --keep-cr \$p >/dev/null 2>&1;then
 		    echo \$pn >>,applied
 	    else
+		    echo FAILED\$pn >>,applied
 		    git am --abort && echo FAILED TO APPLY \$p
 		    break
 	    fi
